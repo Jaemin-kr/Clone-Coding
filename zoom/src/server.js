@@ -1,6 +1,6 @@
 import express from "express";
 import http from "http";
-import WebSocket from "ws"
+import SocketIO from "socket.io";
 
 
 //backendside
@@ -22,27 +22,37 @@ app.get("/", (req, res) => res.render("home"));
 app.get("/*", (req, res) => res.redirect("/"));
 
 
-const handleListen = () => console.log('Listening on http://localhost:3000');
+const httpServer = http.createServer(app);
+const wsServer = SocketIO(httpServer);
 
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
-//http ws서버 동시 운영
-//http서버위에 websocket서버가 동작
+wsServer.on("connection", (socket) => {
+    console.log(socket);
+});
 
-// function handleConnection(socket) {
-//     console.log(socket);
-//     //socket: 사용자와 브라우저 사이를 구분
-// }
-
+/*
+const sockets = [];
 
 wss.on("connection", (socket) => {
+    sockets.push(socket);
+    socket["nickname"] = "Anon";
     console.log("Connected to Browser ^^");
-    socket.on("close", () => console.log("Disconnected from Browserrrrr")); //when close browser
-    socket.on("message", (message) => {
-        console.log(message.toString('utf8')); //Buffer peint add utf8
+    socket.on("close", onSocketClose); //when close browser
+    socket.on("message", (msg) => {
+        const message = JSON.parse(msg);
+        switch (message.type){
+            case "new_message":
+                sockets.forEach((aSocket) =>
+                    aSocket.send(`${socket.nickname}: ${message.payload}`)
+                );
+            case "nickname":
+                socket["nickname"] = message.payload;
+        }
+
     });
     socket.send("hello!!!"); //sending message
     //console.log(socket);
 });
+*/
 
-server.listen(3000, handleListen);
+const handleListen = () => console.log('Listening on http://localhost:3000');
+httpServer.listen(3000, handleListen);
