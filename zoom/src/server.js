@@ -3,15 +3,6 @@ import http from "http";
 import SocketIO from "socket.io";
 
 
-//backendside
-/*
-    wating event, If event is occured using socket print state
-    connect, close, send message, get message
-    wss mean whole server
-*/
-
-
-//http express
 const app = express();
 
 app.set("view engine", "pug");
@@ -26,13 +17,16 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
-    socket.on("enter_room", (msg, done) => {
-        console.log(msg);
-        setTimeout(() => {
-            done();
-        }, 5000);
+    socket.onAny((event) => {
+        console.log(`Socket Event: ${event}`);
     });
+    socket.on("enter_room", (roomName, done) => {
+        socket.join(roomName);
+        done();
+    })
 });
+
+
 
 /*
 const sockets = [];
